@@ -15,6 +15,14 @@ namespace DrawingGenerator
 			this.z = z;
 		}
 
+		public void Normalize()
+		{
+			var norm = Math.Sqrt(x * x + y * y + z * z);
+			x /= norm;
+			y /= norm;
+			z /= norm;
+		}
+
 		public static Vector3d FromString(string input)
 		{
 			var elements = input.Split(' ');
@@ -34,7 +42,7 @@ namespace DrawingGenerator
 
 			return new Vector3d(x, y, z);
 		}
-		public void Normalize()
+		public void NormalizeAngles()
 		{
 			y = NormalizeDeg(y);
 		}

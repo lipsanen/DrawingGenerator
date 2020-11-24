@@ -14,6 +14,22 @@ namespace DrawingGenerator
 			return path;
 		}
 
+		static string ReadOptionalString(string prompt, string defaultValue)
+		{
+			Console.Write(prompt);
+
+			string value = Console.ReadLine();
+
+			if(string.IsNullOrWhiteSpace(value))
+			{
+				return defaultValue;
+			}
+			else
+			{
+				return value;
+			}
+		}
+
 		static Vector3d ReadVector(string prompt)
 		{
 			Console.Write(prompt);
@@ -102,9 +118,6 @@ namespace DrawingGenerator
 			if (args.Count() >= 8)
 			{
 				loader = new ImageLoader(args[0], 0.5f);
-				loader.LoadBinaryImageConnectedComponents();
-				loader.SortPoints();
-
 				outputPath = args[1];
 				target = Vector3d.FromString(args[2]);
 				player = Vector3d.FromString(args[3]);
@@ -112,12 +125,19 @@ namespace DrawingGenerator
 				down = Vector3d.FromString(args[5]);
 				width = double.Parse(args[6]);
 				gun = GUNS[args[7]];
+				string sorting = "Scan";
+				if (args.Count() >= 9)
+					sorting = args[8];
+
+				loader.LoadImagePoints(sorting);
+				loader.SortPoints();
 			}
 			else
 			{
 				imagePath = ReadPath("Image path: ");
+				string sorting = ReadOptionalString("Sorting type (Connected, Random or Scan[default]):", "Scan");
 				loader = new ImageLoader(imagePath, 0.5f);
-				loader.LoadBinaryImageConnectedComponents();
+				loader.LoadImagePoints(sorting);
 				loader.SortPoints();
 
 				outputPath = ReadPath("Output path: ");
@@ -126,7 +146,7 @@ namespace DrawingGenerator
 				width = ReadDouble("Image width in hammer units: ");
 				right = ReadVector("Right vector (translates x coordinate on image to map coordinates): ");
 				down = ReadVector("Down vector (translates y coordinate on image to map coordinates): ");
-				gun = ReadGun("Weapon (AR2, SMG or Pistol): ");
+				gun = ReadGun("Weapon (AR2 or SMG): ");
 			}
 
 			converter = new PointConverter(target, right, down, player);

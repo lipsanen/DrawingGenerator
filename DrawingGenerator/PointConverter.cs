@@ -15,6 +15,8 @@ namespace DrawingGenerator
 			this.start = start;
 			this.right = right;
 			this.down = down;
+			this.right.Normalize();
+			this.down.Normalize();
 			this.playerPos = playerPos;
 		}
 

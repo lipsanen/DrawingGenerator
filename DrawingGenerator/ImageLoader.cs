@@ -94,27 +94,80 @@ namespace DrawingGenerator
 			}
 		}
 
-		public void LoadBinaryImageConnectedComponents()
+		private void LoadBinaryConnectedComponents()
+		{
+			for (int x = 0; x < img.Width; ++x)
+			{
+				for (int y = 0; y < img.Height; ++y)
+				{
+					Point p = new Point(x, y);
+					if (pointsAdded.Contains(p))
+						continue;
+
+					var pixel = img.GetPixel(x, y);
+
+					if (AboveThreshold(pixel))
+					{
+						var list = new List<Point>();
+						FindConnectedComponentRecursive(x, y, list);
+						points.Add(list);
+					}
+				}
+			}
+		}
+
+		private void LoadScanLinePoints()
+		{
+			points.Add(new List<Point>());
+			for (int y = 0; y < img.Height; ++y)
+			{
+				for (int x = 0; x < img.Width; ++x)
+				{
+					var pixel = img.GetPixel(x, y);
+
+					if (AboveThreshold(pixel))
+					{
+						points[0].Add(new Point(x, y));
+					}
+				}
+			}
+		}
+
+		private static Random rng = new Random();
+
+		public static void Shuffle<T>(IList<T> list)
+		{
+			int n = list.Count;
+			while (n > 1)
+			{
+				n--;
+				int k = rng.Next(n + 1);
+				T value = list[k];
+				list[k] = list[n];
+				list[n] = value;
+			}
+		}
+
+		public void LoadImagePoints(string sorting)
 		{
 			using (img = new Bitmap(path))
 			{
-				for(int x=0; x < img.Width; ++x)
+				if(sorting == "Connected")
 				{
-					for(int y=0; y < img.Height; ++y)
+					LoadBinaryConnectedComponents();
+				}
+				else if (sorting == "Random" || sorting == "Scan")
+				{
+					LoadScanLinePoints();
+
+					if(sorting == "Random")
 					{
-						Point p = new Point(x, y);
-						if (pointsAdded.Contains(p))
-							continue;
-
-						var pixel = img.GetPixel(x, y);
-
-						if(AboveThreshold(pixel))
-						{
-							var list = new List<Point>();
-							FindConnectedComponentRecursive(x, y, list);
-							points.Add(list);
-						}	
+						Shuffle(points[0]);
 					}
+				}
+				else
+				{
+					throw new Exception(string.Format("Invalid sorting type {0}", sorting));
 				}
 			}
 		}
